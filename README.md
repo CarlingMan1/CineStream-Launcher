@@ -18,7 +18,7 @@ Built with pure HTML, CSS, and JavaScript, CineStream requires no backend and ru
 
 🛠️ Setup
 1. Clone or Download
-- git clone https://github.com/your-username/your-repo-name.git
+- git clone https://github.com/carlingman1/CineStream-Launcher.git
 - cd your-repo-name
 
 Or just download the index.html file.
