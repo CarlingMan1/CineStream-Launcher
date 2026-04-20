@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineStream Launcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-card: #111118;
+      --bg-elevated: #1a1a24;
+      --accent: #e8a430;
+      --accent-hover: #f5b942;
+      --text-primary: #f0ede8;
+      --text-secondary: #9a9080;
+      --text-muted: #5a5550;
+      --border: #2a2830;
+      --danger: #e85430;
+      --success: #30e890;
+      --shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.34);
+      --shadow-accent: 0 0 0 1px rgba(232, 164, 48, 0.14), 0 16px 40px rgba(232, 164, 48, 0.14);
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --radius-sm: 14px;
+      --transition: 220ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Crimson Pro", Georgia, serif;
+      color: var(--text-primary);
+      background:
+        radial-gradient(circle at top, rgba(232, 164, 48, 0.13), transparent 26%),
+        linear-gradient(180deg, #07070b 0%, #0a0a0f 38%, #0f0f16 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.16;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+      animation: grainShift 11s steps(9) infinite;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: -18vh;
+      left: 50%;
+      width: min(78vw, 920px);
+      height: 42vh;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(232, 164, 48, 0.18) 0%, rgba(232, 164, 48, 0.04) 42%, transparent 72%);
+      filter: blur(48px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      background: none;
+      color: inherit;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 960px);
+      margin: 0 auto;
+      padding: 28px clamp(18px, 4vw, 34px) 56px;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 24px;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: baseline;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-mark {
+      margin: 0;
+      font-family: "Bebas Neue", Impact, sans-serif;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      line-height: 0.9;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-shadow: 0 0 24px rgba(232, 164, 48, 0.22);
+    }
+
+    .brand-subtitle {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.84rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .settings-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(232, 164, 48, 0.2);
+      background: rgba(17, 17, 24, 0.84);
+      color: var(--accent);
+      font-size: 1.25rem;
+      display: grid;
+      place-items: center;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .settings-button:hover,
+    .settings-button:focus-visible {
+      transform: translateY(-2px) rotate(14deg);
+      border-color: rgba(245, 185, 66, 0.42);
+      box-shadow: 0 0 0 4px rgba(232, 164, 48, 0.08), 0 16px 28px rgba(0, 0, 0, 0.28);
+      outline: none;
+    }
+
+    .hero-panel {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(24px, 4vw, 34px);
+      border-radius: 32px;
+      border: 1px solid rgba(232, 164, 48, 0.14);
+      background:
+        linear-gradient(180deg, rgba(26, 26, 36, 0.96), rgba(17, 17, 24, 0.9)),
+        radial-gradient(circle at top right, rgba(232, 164, 48, 0.12), transparent 32%);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -15% -30% auto;
+      width: min(38vw, 340px);
+      height: min(38vw, 340px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232, 164, 48, 0.16), transparent 72%);
+      filter: blur(24px);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.65rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+    }
+
+    .hero-title {
+      margin: 0;
+      font-family: "Bebas Neue", Impact, sans-serif;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      line-height: 0.92;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero-copy {
+      width: min(100%, 62ch);
+      margin: 0.75rem 0 1.65rem;
+      font-size: clamp(1.05rem, 2vw, 1.22rem);
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .search-bar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .search-input-shell {
+      position: relative;
+      border-radius: 999px;
+      background: rgba(10, 10, 15, 0.86);
+      border: 1px solid rgba(232, 164, 48, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 10px 26px rgba(0, 0, 0, 0.24);
+      transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+    }
+
+    .search-input-shell:focus-within {
+      border-color: rgba(245, 185, 66, 0.52);
+      box-shadow: 0 0 0 4px rgba(232, 164, 48, 0.08), 0 0 32px rgba(232, 164, 48, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .search-input {
+      width: 100%;
+      min-height: 60px;
+      padding: 0 24px;
+      border: 0;
+      border-radius: inherit;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: rgba(154, 144, 128, 0.7);
+    }
+
+    .search-button {
+      min-height: 60px;
+      padding: 0 24px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--accent), #c3821d);
+      color: #160f04;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 28px rgba(232, 164, 48, 0.22);
+      transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+    }
+
+    .search-button:hover,
+    .search-button:focus-visible {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      box-shadow: 0 14px 34px rgba(232, 164, 48, 0.28);
+      outline: none;
+    }
+
+    .search-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 14px;
+      min-height: 1.4rem;
+    }
+
+    .search-hint {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .view-stack {
+      position: relative;
+      margin-top: 28px;
+      min-height: 420px;
+    }
+
+    .view {
+      transition: opacity 260ms ease, transform 260ms ease;
+      width: 100%;
+    }
+
+    .view:not(.is-active) {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(18px);
+    }
+
+    .view.is-active {
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .view-grid {
+      display: grid;
+      gap: 22px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(18px, 3vw, 24px);
+      border-radius: 30px;
+      border: 1px solid rgba(232, 164, 48, 0.09);
+      background: linear-gradient(180deg, rgba(17, 17, 24, 0.95), rgba(12, 12, 17, 0.94));
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-family: "Bebas Neue", Impact, sans-serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .section-kicker,
+    .mono-copy {
+      margin: 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .result-card-shell {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .result-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      min-height: 100%;
+      padding: 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(232, 164, 48, 0.1);
+      background:
+        linear-gradient(180deg, rgba(26, 26, 36, 0.95), rgba(16, 16, 23, 0.95)),
+        linear-gradient(135deg, rgba(232, 164, 48, 0.05), transparent);
+      text-align: left;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      animation: fadeSlideUp 480ms ease both;
+      animation-delay: var(--stagger, 0ms);
+    }
+
+    .result-card:hover,
+    .result-card:focus-visible {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-accent);
+      border-color: rgba(232, 164, 48, 0.26);
+      outline: none;
+    }
+
+    .card-actions,
+    .detail-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-actions > *,
+    .detail-actions > * {
+      flex: 1 1 0;
+    }
+
+    .utility-button {
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(17, 17, 24, 0.9);
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: transform var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .utility-button:hover,
+    .utility-button:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(232, 164, 48, 0.24);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 4px rgba(232, 164, 48, 0.06);
+      outline: none;
+    }
+
+    .utility-button.is-active {
+      border-color: rgba(232, 164, 48, 0.28);
+      background: rgba(232, 164, 48, 0.12);
+      color: var(--accent);
+    }
+
+    .utility-button.is-danger:hover,
+    .utility-button.is-danger:focus-visible {
+      border-color: rgba(232, 84, 48, 0.26);
+      color: #ffd6cd;
+      box-shadow: 0 0 0 4px rgba(232, 84, 48, 0.08);
+    }
+
+    .card-poster,
+    .detail-poster,
+    .episode-thumb {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(36, 35, 44, 0.92), rgba(20, 19, 26, 0.92));
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .card-poster {
+      aspect-ratio: 2 / 3;
+    }
+
+    .detail-poster {
+      aspect-ratio: 2 / 3;
+      min-height: 440px;
+      box-shadow: 0 22px 48px rgba(0, 0, 0, 0.32);
+    }
+
+    .episode-thumb {
+      aspect-ratio: 16 / 9;
+    }
+
+    .media-placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(232, 164, 48, 0.14), transparent 48%),
+        linear-gradient(180deg, rgba(26, 26, 36, 0.92), rgba(14, 14, 19, 0.94));
+      color: var(--text-muted);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .media-image {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .result-meta {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.4rem 0.72rem;
+      width: fit-content;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 164, 48, 0.16);
+      background: rgba(232, 164, 48, 0.08);
+      color: var(--accent);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .result-title {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+    }
+
+    .result-year {
+      margin: 0;
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 340px;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-shell {
+      display: grid;
+      gap: 16px;
+      justify-items: center;
+      width: min(100%, 440px);
+    }
+
+    .empty-illustration {
+      position: relative;
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(232, 164, 48, 0.22), rgba(232, 164, 48, 0.04) 38%, transparent 72%),
+        rgba(17, 17, 24, 0.96);
+      border: 1px solid rgba(232, 164, 48, 0.16);
+      box-shadow: inset 0 0 36px rgba(232, 164, 48, 0.08), 0 24px 42px rgba(0, 0, 0, 0.24);
+    }
+
+    .empty-illustration::before,
+    .empty-illustration::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid rgba(232, 164, 48, 0.24);
+    }
+
+    .empty-illustration::before {
+      inset: 26px;
+    }
+
+    .empty-illustration::after {
+      inset: 44px;
+      border-style: dashed;
+    }
+
+    .empty-title {
+      margin: 0;
+      font-family: "Bebas Neue", Impact, sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .empty-copy {
+      margin: 0;
+      font-size: 1.06rem;
+      line-height: 1.6;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 16px;
+      padding: 0.82rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 164, 48, 0.14);
+      background: rgba(17, 17, 24, 0.76);
+      color: var(--text-primary);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .back-button:hover,
+    .back-button:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(232, 164, 48, 0.32);
+      box-shadow: 0 0 0 4px rgba(232, 164, 48, 0.08);
+      outline: none;
+    }
+
+    .detail-shell {
+      display: grid;
+      gap: 22px;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+      gap: clamp(20px, 4vw, 34px);
+      align-items: start;
+    }
+
+    .detail-copy {
+      display: grid;
+      gap: 16px;
+    }
+
+    .detail-title {
+      margin: 0;
+      font-family: "Bebas Neue", Impact, sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4.2rem);
+      line-height: 0.94;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .meta-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.54rem 0.82rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(26, 26, 36, 0.92);
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rating-badge {
+      color: var(--accent);
+      border-color: rgba(232, 164, 48, 0.16);
+      box-shadow: inset 0 0 18px rgba(232, 164, 48, 0.06);
+    }
+
+    .detail-description {
+      margin: 0;
+      max-width: 62ch;
+      font-size: 1.08rem;
+      line-height: 1.66;
+      color: var(--text-secondary);
+    }
+
+    .facts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    .fact-card {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(26, 26, 36, 0.82);
+    }
+
+    .fact-label {
+      margin: 0 0 0.45rem;
+      color: var(--text-muted);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .fact-value {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+
+    .watch-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      width: fit-content;
+      min-height: 54px;
+      padding: 0 20px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--accent), #c6841f);
+      color: #130d03;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 32px rgba(232, 164, 48, 0.22);
+      transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+    }
+
+    .watch-cta:hover,
+    .watch-cta:focus-visible {
+      transform: translateY(-2px) scale(1.01);
+      filter: brightness(1.06);
+      box-shadow: 0 0 0 6px rgba(232, 164, 48, 0.08), 0 18px 40px rgba(232, 164, 48, 0.28);
+      outline: none;
+      animation: pulseGlow 1.2s ease-in-out infinite alternate;
+    }
+
+    .card-actions .watch-cta,
+    .card-actions .utility-button,
+    .detail-actions .watch-cta,
+    .detail-actions .utility-button {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .series-panel,
+    .episodes-panel {
+      padding: 22px;
+      border-radius: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(17, 17, 24, 0.72);
+    }
+
+    .season-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .season-tab {
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 164, 48, 0.12);
+      background: rgba(26, 26, 36, 0.84);
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: transform var(--transition), background var(--transition), color var(--transition), border-color var(--transition);
+    }
+
+    .season-tab:hover,
+    .season-tab:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(232, 164, 48, 0.28);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .season-tab.is-active {
+      background: rgba(232, 164, 48, 0.13);
+      border-color: rgba(232, 164, 48, 0.32);
+      color: var(--accent);
+      box-shadow: inset 0 0 18px rgba(232, 164, 48, 0.08);
+    }
+
+    .episode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .episode-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: linear-gradient(180deg, rgba(26, 26, 36, 0.92), rgba(16, 16, 23, 0.96));
+      box-shadow: 0 14px 24px rgba(0, 0, 0, 0.16);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      animation: fadeSlideUp 480ms ease both;
+      animation-delay: var(--stagger, 0ms);
+    }
+
+    .episode-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(232, 164, 48, 0.2);
+      box-shadow: 0 20px 36px rgba(0, 0, 0, 0.22);
+    }
+
+    .episode-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+
+    .episode-code {
+      width: fit-content;
+      padding: 0.36rem 0.56rem;
+      border-radius: 10px;
+      background: rgba(232, 164, 48, 0.12);
+      color: var(--accent);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .episode-title {
+      margin: 0;
+      font-size: 1.08rem;
+      line-height: 1.25;
+    }
+
+    .episode-overview {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .episode-actions {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .watch-cta.is-small {
+      min-height: 44px;
+      padding: 0 16px;
+      font-size: 0.75rem;
+    }
+
+    .message-box {
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(232, 164, 48, 0.12);
+      background: rgba(17, 17, 24, 0.76);
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .skeleton-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .skeleton-card,
+    .skeleton-line,
+    .skeleton-pill,
+    .skeleton-poster,
+    .skeleton-thumb {
+      position: relative;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .skeleton-card::after,
+    .skeleton-line::after,
+    .skeleton-pill::after,
+    .skeleton-poster::after,
+    .skeleton-thumb::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 1.35s infinite;
+    }
+
+    .skeleton-card {
+      padding: 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(17, 17, 24, 0.9);
+    }
+
+    .skeleton-poster {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      border-radius: 18px;
+      margin-bottom: 12px;
+    }
+
+    .skeleton-line {
+      height: 13px;
+      margin-bottom: 10px;
+      border-radius: 999px;
+    }
+
+    .skeleton-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .skeleton-line.is-short {
+      width: 42%;
+    }
+
+    .skeleton-line.is-medium {
+      width: 68%;
+    }
+
+    .skeleton-pill {
+      width: 86px;
+      height: 28px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .detail-skeleton {
+      display: grid;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+      gap: clamp(20px, 4vw, 34px);
+    }
+
+    .skeleton-poster.is-large {
+      min-height: 440px;
+      margin-bottom: 0;
+    }
+
+    .detail-skeleton-copy {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .detail-skeleton-facts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .fact-skeleton {
+      height: 70px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fact-skeleton::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 1.35s infinite;
+    }
+
+    .toast-region {
+      position: fixed;
+      top: 22px;
+      right: 20px;
+      z-index: 30;
+      display: grid;
+      gap: 10px;
+      width: min(92vw, 360px);
+    }
+
+    .toast {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(17, 17, 24, 0.96);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.26);
+      color: var(--text-primary);
+      transform: translateY(-10px);
+      opacity: 0;
+      transition: transform 220ms ease, opacity 220ms ease;
+    }
+
+    .toast.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.is-danger {
+      border-color: rgba(232, 84, 48, 0.28);
+    }
+
+    .toast.is-success {
+      border-color: rgba(48, 232, 144, 0.28);
+    }
+
+    .toast-label {
+      margin: 0 0 0.35rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .toast-copy {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(4, 4, 8, 0.68);
+      backdrop-filter: blur(18px);
+    }
+
+    .modal-overlay.is-open {
+      display: grid;
+    }
+
+    .settings-modal {
+      width: min(100%, 520px);
+      padding: 26px;
+      border-radius: 28px;
+      border: 1px solid rgba(232, 164, 48, 0.14);
+      background:
+        linear-gradient(180deg, rgba(26, 26, 36, 0.98), rgba(13, 13, 19, 0.97)),
+        radial-gradient(circle at top right, rgba(232, 164, 48, 0.12), transparent 36%);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.38);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-family: "Bebas Neue", Impact, sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .modal-copy {
+      margin: 0.55rem 0 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      font-size: 1rem;
+    }
+
+    .modal-link {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .modal-link:hover,
+    .modal-link:focus-visible {
+      text-decoration: underline;
+      outline: none;
+    }
+
+    .modal-close {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(17, 17, 24, 0.8);
+      color: var(--text-secondary);
+      transition: transform var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    .modal-close:hover,
+    .modal-close:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(232, 164, 48, 0.24);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .settings-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 0.45rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.76rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .api-input {
+      width: 100%;
+      min-height: 56px;
+      padding: 0 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(232, 164, 48, 0.14);
+      background: rgba(10, 10, 15, 0.9);
+      color: var(--text-primary);
+      outline: none;
+      transition: box-shadow var(--transition), border-color var(--transition);
+    }
+
+    .api-input:focus {
+      border-color: rgba(245, 185, 66, 0.48);
+      box-shadow: 0 0 0 4px rgba(232, 164, 48, 0.08);
+    }
+
+    .modal-note {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .secondary-button,
+    .primary-button {
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+
+    .secondary-button {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(17, 17, 24, 0.86);
+      color: var(--text-secondary);
+    }
+
+    .secondary-button:hover,
+    .secondary-button:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(232, 164, 48, 0.22);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .primary-button {
+      background: linear-gradient(180deg, var(--accent), #c6841f);
+      color: #160f04;
+      box-shadow: 0 10px 26px rgba(232, 164, 48, 0.22);
+    }
+
+    .primary-button:hover,
+    .primary-button:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(232, 164, 48, 0.28);
+      outline: none;
+    }
+
+    .modal-status {
+      min-height: 1.3rem;
+      margin: 0;
+      color: var(--danger);
+      font-size: 0.94rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseGlow {
+      from {
+        box-shadow: 0 0 0 6px rgba(232, 164, 48, 0.06), 0 18px 40px rgba(232, 164, 48, 0.24);
+      }
+
+      to {
+        box-shadow: 0 0 0 8px rgba(232, 164, 48, 0.12), 0 20px 46px rgba(232, 164, 48, 0.32);
+      }
+    }
+
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes grainShift {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-1.5%, 1.2%); }
+      40% { transform: translate(1.1%, -1.5%); }
+      60% { transform: translate(1.6%, 1.1%); }
+      80% { transform: translate(-1.2%, -1%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @media (max-width: 960px) {
+      .detail-layout,
+      .detail-skeleton {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-poster {
+        min-height: 360px;
+      }
+
+      .episode-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .search-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .search-button {
+        width: 100%;
+      }
+
+      .section-head,
+      .search-meta-row,
+      .modal-head {
+        align-items: start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app-shell {
+        padding-inline: 14px;
+      }
+
+      .hero-panel,
+      .panel,
+      .series-panel,
+      .episodes-panel {
+        border-radius: 24px;
+      }
+
+      .episode-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .toast-region {
+        top: 14px;
+        right: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-lockup">
+        <h1 class="brand-mark">CineStream</h1>
+        <span class="brand-subtitle">Launcher</span>
+      </div>
+      <button id="settingsButton" class="settings-button" type="button" aria-label="Open OMDB API key settings" title="OMDB API key settings">⚙</button>
+    </header>
+
+    <section class="hero-panel" aria-labelledby="heroTitle">
+      <p class="eyebrow">Midnight Library Access</p>
+      <h2 id="heroTitle" class="hero-title">Find A Title. Step Into The Stream.</h2>
+      <p class="hero-copy">Search for a movie or series, pull metadata from Cinemeta, then launch the exact Videasy destination in one click.</p>
+
+      <form id="searchForm" class="search-bar" autocomplete="off">
+        <div class="search-input-shell">
+          <label class="sr-only" for="searchInput">Search by movie or series title</label>
+          <input id="searchInput" class="search-input" type="search" placeholder="Search movies or TV series..." enterkeyhint="search" spellcheck="false">
+        </div>
+        <button class="search-button" type="submit">Search</button>
+      </form>
+
+      <div class="search-meta-row">
+        <p id="searchHint" class="search-hint">Enter at least 2 characters to start searching.</p>
+      </div>
+    </section>
+
+    <main class="view-stack">
+      <section id="searchView" class="view view-grid is-active" aria-labelledby="resultsHeading">
+        <div class="panel">
+          <div class="section-head">
+            <h3 id="myListHeading" class="section-title">My List</h3>
+            <p id="myListSummary" class="section-kicker">0 saved titles</p>
+          </div>
+          <div id="myListContainer"></div>
+        </div>
+
+        <div class="panel">
+          <div class="section-head">
+            <h3 id="resultsHeading" class="section-title">Search Results</h3>
+            <p id="resultsSummary" class="section-kicker">Waiting for a title...</p>
+          </div>
+          <div id="resultsContainer"></div>
+        </div>
+      </section>
+
+      <section id="detailView" class="view" aria-labelledby="detailHeading">
+        <button id="backButton" class="back-button" type="button">← Back To Results</button>
+        <div id="detailContainer"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="settingsTitle" class="modal-title">OMDB API Key</h2>
+          <p id="settingsCopy" class="modal-copy">Enter your free OMDB key to unlock title search. You can get one at <a class="modal-link" href="https://www.omdbapi.com/apikey.aspx" target="_blank" rel="noreferrer noopener">omdbapi.com/apikey.aspx</a>.</p>
+        </div>
+        <button id="closeModalButton" class="modal-close" type="button" aria-label="Close settings">✕</button>
+      </div>
+
+      <form id="settingsForm" class="settings-form">
+        <div>
+          <label class="field-label" for="apiKeyInput">API Key</label>
+          <input id="apiKeyInput" class="api-input" type="text" placeholder="Paste your OMDB API key" autocomplete="off" spellcheck="false">
+        </div>
+        <p class="modal-note">The key is saved locally in your browser as <code>cinestream_omdb_key</code>. It never leaves your device except when used for OMDB requests.</p>
+        <p id="modalStatus" class="modal-status" role="status" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button id="cancelModalButton" class="secondary-button" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Save Key</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // ── CONFIG ─────────────────────────────────────────────
+    const CONFIG = {
+      storageKey: "cinestream_omdb_key",
+      myListStorageKey: "cinestream_my_list",
+      minSearchLength: 2,
+      searchDebounceMs: 300,
+      omdbBaseUrl: "https://www.omdbapi.com/",
+      cinemetaBaseUrl: "https://v3-cinemeta.strem.io",
+      videasyBaseUrl: "https://player.videasy.net",
+      videasyDbBaseUrl: "https://db.videasy.net/3",
+      toastDurationMs: 4600
+    };
+
+    // ── STATE ──────────────────────────────────────────────
+    const state = {
+      apiKey: localStorage.getItem(CONFIG.storageKey) || "",
+      myList: [],
+      searchQuery: "",
+      searchResults: [],
+      currentMeta: null,
+      currentSeason: 1,
+      view: "search",
+      isSearching: false,
+      isLoadingMeta: false,
+      isSettingsRequired: !localStorage.getItem(CONFIG.storageKey),
+      modalMessage: "",
+      resultsMessage: "Waiting for a title..."
+    };
+
+    const runtime = {
+      searchDebounceId: null,
+      searchAbortController: null,
+      metaAbortController: null,
+      latestSearchToken: 0,
+      latestDetailToken: 0
+    };
+
+    const elements = {
+      searchForm: document.getElementById("searchForm"),
+      searchInput: document.getElementById("searchInput"),
+      searchHint: document.getElementById("searchHint"),
+      searchView: document.getElementById("searchView"),
+      detailView: document.getElementById("detailView"),
+      myListContainer: document.getElementById("myListContainer"),
+      myListSummary: document.getElementById("myListSummary"),
+      resultsContainer: document.getElementById("resultsContainer"),
+      resultsSummary: document.getElementById("resultsSummary"),
+      detailContainer: document.getElementById("detailContainer"),
+      backButton: document.getElementById("backButton"),
+      settingsButton: document.getElementById("settingsButton"),
+      modalOverlay: document.getElementById("modalOverlay"),
+      closeModalButton: document.getElementById("closeModalButton"),
+      cancelModalButton: document.getElementById("cancelModalButton"),
+      settingsForm: document.getElementById("settingsForm"),
+      apiKeyInput: document.getElementById("apiKeyInput"),
+      modalStatus: document.getElementById("modalStatus"),
+      settingsCopy: document.getElementById("settingsCopy"),
+      toastRegion: document.getElementById("toastRegion")
+    };
+
+    // ── API ────────────────────────────────────────────────
+    function createAppError(message, code, details = {}) {
+      const error = new Error(message);
+      error.code = code;
+      Object.assign(error, details);
+      return error;
+    }
+
+    async function fetchJson(url, options = {}) {
+      let response;
+
+      try {
+        response = await fetch(url, options);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          throw error;
+        }
+
+        throw createAppError(
+          "The request could not be completed.",
+          "NETWORK_OR_CORS",
+          { originalError: error }
+        );
+      }
+
+      if (!response.ok) {
+        throw createAppError(
+          "The service responded with an unexpected status.",
+          "HTTP_ERROR",
+          { status: response.status }
+        );
+      }
+
+      try {
+        return await response.json();
+      } catch (error) {
+        throw createAppError("The response could not be read.", "PARSE_ERROR", { originalError: error });
+      }
+    }
+
+    async function searchTitles(query) {
+      if (!state.apiKey) {
+        throw createAppError("Add your OMDB API key before searching.", "OMDB_API_KEY");
+      }
+
+      if (runtime.searchAbortController) {
+        runtime.searchAbortController.abort();
+      }
+
+      runtime.searchAbortController = new AbortController();
+
+      const url = new URL(CONFIG.omdbBaseUrl);
+      url.searchParams.set("s", query);
+      url.searchParams.set("apikey", state.apiKey);
+
+      const data = await fetchJson(url.toString(), {
+        signal: runtime.searchAbortController.signal
+      });
+
+      if (data.Response === "False") {
+        const omdbMessage = data.Error || "OMDB could not complete the search.";
+
+        if (/api key|apikey|invalid|unauthorized/i.test(omdbMessage)) {
+          throw createAppError(omdbMessage, "OMDB_API_KEY");
+        }
+
+        if (/too many results/i.test(omdbMessage)) {
+          throw createAppError("Too many results. Add another word to narrow the search.", "OMDB_SEARCH");
+        }
+
+        if (/movie not found/i.test(omdbMessage)) {
+          return [];
+        }
+
+        throw createAppError(omdbMessage, "OMDB_SEARCH");
+      }
+
+      return (data.Search || [])
+        .filter((item) => item && (item.Type === "movie" || item.Type === "series"))
+        .map((item) => ({
+          title: item.Title || "Untitled",
+          year: item.Year || "Unknown",
+          imdbId: item.imdbID,
+          type: item.Type,
+          poster: item.Poster || ""
+        }));
+    }
+
+    async function fetchCinemeta(imdbId, type) {
+      if (runtime.metaAbortController) {
+        runtime.metaAbortController.abort();
+      }
+
+      runtime.metaAbortController = new AbortController();
+
+      const safeType = type === "series" ? "series" : "movie";
+      const url = `${CONFIG.cinemetaBaseUrl}/meta/${safeType}/${encodeURIComponent(imdbId)}.json`;
+      const data = await fetchJson(url, {
+        signal: runtime.metaAbortController.signal
+      });
+
+      if (!data || !data.meta) {
+        throw createAppError("Cinemeta returned no metadata for this title.", "CINEMETA_EMPTY");
+      }
+
+      return data.meta;
+    }
+
+    async function fetchVideasyPlayerId(imdbId, type) {
+      const url = new URL(`${CONFIG.videasyDbBaseUrl}/find/${encodeURIComponent(imdbId)}`);
+      url.searchParams.set("external_source", "imdb_id");
+      url.searchParams.set("language", "en-US");
+
+      const data = await fetchJson(url.toString());
+      const resultKey = type === "series" ? "tv_results" : "movie_results";
+      const results = Array.isArray(data[resultKey]) ? data[resultKey] : [];
+      const match = results.find((item) => item && Number.isFinite(Number(item.id)));
+
+      if (!match) {
+        throw createAppError("Videasy could not resolve a player ID for this title.", "VIDEASY_ID");
+      }
+
+      return String(match.id);
+    }
+
+    function normalizeSavedItem(item) {
+      if (!item || !item.imdbId) {
+        return null;
+      }
+
+      return {
+        imdbId: String(item.imdbId),
+        type: item.type === "series" ? "series" : "movie",
+        title: item.title || item.name || "Untitled",
+        year: item.year ? String(item.year) : "Unknown",
+        poster: item.poster || "",
+        description: item.description || "",
+        playerId: item.playerId ? String(item.playerId) : "",
+        addedAt: item.addedAt || new Date().toISOString()
+      };
+    }
+
+    function loadMyList() {
+      try {
+        const raw = localStorage.getItem(CONFIG.myListStorageKey);
+
+        if (!raw) {
+          return [];
+        }
+
+        const parsed = JSON.parse(raw);
+
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+
+        return parsed
+          .map(normalizeSavedItem)
+          .filter(Boolean)
+          .sort((first, second) => new Date(second.addedAt).getTime() - new Date(first.addedAt).getTime());
+      } catch (error) {
+        console.warn("Unable to load My List from localStorage.", error);
+        return [];
+      }
+    }
+
+    function persistMyList() {
+      localStorage.setItem(CONFIG.myListStorageKey, JSON.stringify(state.myList));
+    }
+
+    function buildSavedItemFromResult(result) {
+      return normalizeSavedItem({
+        imdbId: result.imdbId || result.id,
+        type: result.type,
+        title: result.title || result.name,
+        year: result.year,
+        poster: result.poster,
+        description: result.description || "",
+        playerId: result.playerId || ""
+      });
+    }
+
+    function buildSavedItemFromMeta(meta) {
+      return normalizeSavedItem({
+        imdbId: meta.id,
+        type: meta.type,
+        title: meta.name,
+        year: meta.year,
+        poster: meta.poster,
+        description: meta.description,
+        playerId: meta.playerId || ""
+      });
+    }
+
+    function isInMyList(imdbId) {
+      return state.myList.some((item) => item.imdbId === String(imdbId));
+    }
+
+    function getSavedItem(imdbId) {
+      return state.myList.find((item) => item.imdbId === String(imdbId)) || null;
+    }
+
+    function upsertMyListItem(item, options = {}) {
+      const normalized = normalizeSavedItem(item);
+
+      if (!normalized) {
+        return null;
+      }
+
+      const existing = getSavedItem(normalized.imdbId);
+      const merged = existing
+        ? {
+            ...existing,
+            ...normalized,
+            addedAt: existing.addedAt
+          }
+        : normalized;
+
+      state.myList = [
+        merged,
+        ...state.myList.filter((entry) => entry.imdbId !== merged.imdbId)
+      ];
+      persistMyList();
+
+      if (!options.quiet) {
+        showToast(`${merged.title} was added to My List.`, "success");
+      }
+
+      render();
+      return merged;
+    }
+
+    function removeMyListItem(imdbId, options = {}) {
+      const existing = getSavedItem(imdbId);
+
+      if (!existing) {
+        return;
+      }
+
+      state.myList = state.myList.filter((item) => item.imdbId !== String(imdbId));
+      persistMyList();
+
+      if (!options.quiet) {
+        showToast(`${existing.title} was removed from My List.`, "success");
+      }
+
+      render();
+    }
+
+    function toggleMyListItem(item) {
+      const normalized = normalizeSavedItem(item);
+
+      if (!normalized) {
+        return;
+      }
+
+      if (isInMyList(normalized.imdbId)) {
+        removeMyListItem(normalized.imdbId);
+        return;
+      }
+
+      upsertMyListItem(normalized);
+    }
+
+    function getFilteredMyList() {
+      const query = state.searchQuery.trim().toLowerCase();
+
+      if (!query) {
+        return state.myList;
+      }
+
+      return state.myList.filter((item) => {
+        const haystack = [item.title, item.year, item.type, item.imdbId]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(query);
+      });
+    }
+
+    // ── RENDER ─────────────────────────────────────────────
+    function createElement(tag, className, text) {
+      const node = document.createElement(tag);
+
+      if (className) {
+        node.className = className;
+      }
+
+      if (typeof text === "string") {
+        node.textContent = text;
+      }
+
+      return node;
+    }
+
+    function clearNode(node) {
+      node.replaceChildren();
+    }
+
+    function showToast(message, tone = "danger") {
+      const toast = createElement("article", `toast is-${tone}`);
+      const label = createElement("p", "toast-label", tone === "success" ? "Success" : "Notice");
+      const copy = createElement("p", "toast-copy", message);
+
+      toast.append(label, copy);
+      elements.toastRegion.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.add("is-visible");
+      });
+
+      window.setTimeout(() => {
+        toast.classList.remove("is-visible");
+        window.setTimeout(() => {
+          toast.remove();
+        }, 240);
+      }, CONFIG.toastDurationMs);
+    }
+
+    function handleError(error, context) {
+      if (!error || error.name === "AbortError") {
+        return;
+      }
+
+      console.error(`[${context}]`, error);
+
+      let message = error.message || "Something went wrong.";
+
+      if (error.code === "NETWORK_OR_CORS") {
+        message = "The request failed before a response came back. If your browser blocks cross-origin requests, try a local web server, a CORS proxy, a CORS-friendly extension, or another browser profile.";
+      } else if (error.code === "HTTP_ERROR" && typeof error.status === "number") {
+        message = `The service returned HTTP ${error.status}. Please try again in a moment.`;
+      }
+
+      if (error.code === "OMDB_API_KEY") {
+        openSettingsModal(false, message);
+      }
+
+      showToast(message, "danger");
+      render();
+    }
+
+    function switchView(view) {
+      state.view = view;
+      elements.searchView.classList.toggle("is-active", view === "search");
+      elements.detailView.classList.toggle("is-active", view === "detail");
+    }
+
+    function hasUsableImage(url) {
+      return Boolean(url && url !== "N/A");
+    }
+
+    function createMediaFrame(options) {
+      const {
+        wrapperClass,
+        imageClass,
+        src,
+        alt,
+        fallbackText
+      } = options;
+
+      const frame = createElement("div", wrapperClass);
+      const placeholder = createElement("div", "media-placeholder", fallbackText);
+      frame.appendChild(placeholder);
+
+      if (hasUsableImage(src)) {
+        const image = createElement("img", imageClass || "media-image");
+        image.src = src;
+        image.alt = alt;
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.addEventListener("error", () => {
+          image.remove();
+        }, { once: true });
+        frame.appendChild(image);
+      }
+
+      return frame;
+    }
+
+    function createTypeBadge(type) {
+      return createElement("span", "type-badge", type === "series" ? "SERIES" : "MOVIE");
+    }
+
+    function createTitleCardSurface(item, index, onOpen) {
+      const card = createElement("button", "result-card");
+      card.type = "button";
+      card.style.setProperty("--stagger", `${index * 45}ms`);
+      card.setAttribute("aria-label", `Open details for ${item.title}`);
+
+      const poster = createMediaFrame({
+        wrapperClass: "card-poster",
+        imageClass: "media-image",
+        src: item.poster,
+        alt: `${item.title} poster`,
+        fallbackText: "No Poster"
+      });
+
+      const meta = createElement("div", "result-meta");
+      const badge = createTypeBadge(item.type);
+      const title = createElement("h4", "result-title", item.title);
+      const year = createElement("p", "result-year", item.year);
+
+      meta.append(badge, title, year);
+      card.append(poster, meta);
+      card.addEventListener("click", onOpen);
+
+      return card;
+    }
+
+    function createMyListToggleButton(item) {
+      const saved = isInMyList(item.imdbId);
+      const button = createElement(
+        "button",
+        `utility-button${saved ? " is-active" : ""}`,
+        saved ? "Saved To My List" : "+ My List"
+      );
+      button.type = "button";
+      button.addEventListener("click", () => {
+        toggleMyListItem(item);
+      });
+      return button;
+    }
+
+    function createResultCard(result, index) {
+      const shell = createElement("article", "result-card-shell");
+      const savedItem = buildSavedItemFromResult(result);
+      const card = createTitleCardSurface(result, index, () => {
+        void openTitleDetail(result);
+      });
+      const actions = createElement("div", "card-actions");
+      actions.appendChild(createMyListToggleButton(savedItem));
+      shell.append(card, actions);
+      return shell;
+    }
+
+    async function ensureMyListPlayerId(item) {
+      if (item.playerId) {
+        return item.playerId;
+      }
+
+      const playerId = await fetchVideasyPlayerId(item.imdbId, item.type);
+      upsertMyListItem({ ...item, playerId }, { quiet: true });
+
+      if (state.currentMeta && state.currentMeta.id === item.imdbId) {
+        state.currentMeta = {
+          ...state.currentMeta,
+          playerId
+        };
+        render();
+      }
+
+      return playerId;
+    }
+
+    async function quickOpenMyListItem(item) {
+      try {
+        if (item.type === "movie") {
+          const playerId = await ensureMyListPlayerId(item);
+          openVideasyUrl(getVideasyMovieUrl(playerId));
+          return;
+        }
+
+        await openTitleDetail({
+          imdbId: item.imdbId,
+          type: item.type,
+          title: item.title,
+          year: item.year,
+          poster: item.poster,
+          playerId: item.playerId || ""
+        });
+      } catch (error) {
+        handleError(error, "My List Quick Open");
+      }
+    }
+
+    function createMyListCard(item, index) {
+      const shell = createElement("article", "result-card-shell");
+      const card = createTitleCardSurface({
+        title: item.title,
+        year: item.year,
+        poster: item.poster,
+        type: item.type
+      }, index, () => {
+        void openTitleDetail({
+          imdbId: item.imdbId,
+          type: item.type,
+          title: item.title,
+          year: item.year,
+          poster: item.poster,
+          playerId: item.playerId || ""
+        });
+      });
+
+      const actions = createElement("div", "card-actions");
+      const primaryButton = createElement(
+        "button",
+        "watch-cta is-small",
+        item.type === "movie" ? "▶ Watch Now" : "Browse Seasons"
+      );
+      primaryButton.type = "button";
+      primaryButton.addEventListener("click", () => {
+        void quickOpenMyListItem(item);
+      });
+
+      const removeButton = createElement("button", "utility-button is-danger", "Remove");
+      removeButton.type = "button";
+      removeButton.addEventListener("click", () => {
+        removeMyListItem(item.imdbId);
+      });
+
+      actions.append(primaryButton, removeButton);
+      shell.append(card, actions);
+      return shell;
+    }
+
+    function renderSearchSkeletons() {
+      const grid = createElement("div", "skeleton-grid");
+
+      for (let index = 0; index < 8; index += 1) {
+        const card = createElement("div", "skeleton-card");
+        const poster = createElement("div", "skeleton-poster");
+        const pill = createElement("div", "skeleton-pill");
+        const lineOne = createElement("div", "skeleton-line");
+        const lineTwo = createElement("div", "skeleton-line is-short");
+        card.append(poster, pill, lineOne, lineTwo);
+        grid.appendChild(card);
+      }
+
+      return grid;
+    }
+
+    function createEmptyState(title, copy) {
+      const wrapper = createElement("div", "empty-state");
+      const shell = createElement("div", "empty-shell");
+      const illustration = createElement("div", "empty-illustration");
+      illustration.setAttribute("aria-hidden", "true");
+      const heading = createElement("h4", "empty-title", title);
+      const paragraph = createElement("p", "empty-copy", copy);
+      shell.append(illustration, heading, paragraph);
+      wrapper.appendChild(shell);
+      return wrapper;
+    }
+
+    function createInfoFact(labelText, valueText) {
+      const card = createElement("div", "fact-card");
+      const label = createElement("p", "fact-label", labelText);
+      const value = createElement("p", "fact-value", valueText);
+      card.append(label, value);
+      return card;
+    }
+
+    function formatImdbRating(value) {
+      if (!value || value === "N/A") {
+        return "Unrated";
+      }
+
+      return `${value}/10`;
+    }
+
+    function formatSeasonEpisodeLabel(episode) {
+      const season = String(Number(episode.season) || 0).padStart(2, "0");
+      const number = String(Number(episode.episode) || 0).padStart(2, "0");
+      return `S${season}E${number}`;
+    }
+
+    function getAvailableSeasons(meta) {
+      return [...new Set(
+        (meta.videos || [])
+          .map((video) => Number(video.season))
+          .filter((value) => Number.isFinite(value))
+      )].sort((first, second) => first - second);
+    }
+
+    function getEpisodesForSeason(meta, season) {
+      return (meta.videos || [])
+        .filter((video) => Number(video.season) === Number(season))
+        .sort((first, second) => Number(first.episode) - Number(second.episode));
+    }
+
+    function getLaunchId(meta) {
+      return meta.playerId || meta.id;
+    }
+
+    function getVideasyMovieUrl(playerId) {
+      return `${CONFIG.videasyBaseUrl}/movie/${encodeURIComponent(playerId)}`;
+    }
+
+    function getVideasyEpisodeUrl(playerId, season, episode) {
+      return `${CONFIG.videasyBaseUrl}/tv/${encodeURIComponent(playerId)}/${encodeURIComponent(String(season))}/${encodeURIComponent(String(episode))}`;
+    }
+
+    function createEpisodeCard(playerId, episode, index) {
+      const card = createElement("article", "episode-card");
+      card.style.setProperty("--stagger", `${index * 40}ms`);
+
+      const thumb = createMediaFrame({
+        wrapperClass: "episode-thumb",
+        imageClass: "media-image",
+        src: episode.thumbnail,
+        alt: `${episode.title || "Episode"} thumbnail`,
+        fallbackText: "No Frame"
+      });
+
+      const header = createElement("div", "episode-header");
+      const textWrap = createElement("div");
+      const code = createElement("span", "episode-code", formatSeasonEpisodeLabel(episode));
+      const title = createElement("h4", "episode-title", episode.title || `Episode ${episode.episode}`);
+      textWrap.append(code, title);
+
+      const overview = createElement(
+        "p",
+        "episode-overview",
+        episode.overview || "Overview unavailable for this episode."
+      );
+
+      const actions = createElement("div", "episode-actions");
+      const watchButton = createElement("button", "watch-cta is-small", "▶ Watch");
+      watchButton.type = "button";
+      watchButton.addEventListener("click", () => {
+        openVideasyUrl(getVideasyEpisodeUrl(playerId, episode.season, episode.episode));
+      });
+
+      actions.appendChild(watchButton);
+      header.appendChild(textWrap);
+      card.append(thumb, header, overview, actions);
+
+      return card;
+    }
+
+    function renderDetailSkeleton() {
+      const shell = createElement("section", "panel");
+      const layout = createElement("div", "detail-skeleton");
+      const poster = createElement("div", "skeleton-poster is-large");
+      const copy = createElement("div", "detail-skeleton-copy");
+
+      copy.append(
+        createElement("div", "skeleton-pill"),
+        createElement("div", "skeleton-line"),
+        createElement("div", "skeleton-line is-medium"),
+        createElement("div", "skeleton-line"),
+        createElement("div", "skeleton-line"),
+        createElement("div", "skeleton-line is-medium")
+      );
+
+      const facts = createElement("div", "detail-skeleton-facts");
+      for (let index = 0; index < 3; index += 1) {
+        facts.appendChild(createElement("div", "fact-skeleton"));
+      }
+
+      copy.appendChild(facts);
+      copy.appendChild(createElement("div", "skeleton-line is-medium"));
+      layout.append(poster, copy);
+      shell.appendChild(layout);
+      return shell;
+    }
+
+    function renderSearchResults() {
+      clearNode(elements.resultsContainer);
+
+      if (state.isSearching) {
+        elements.resultsSummary.textContent = "Projecting matches...";
+        elements.resultsContainer.appendChild(renderSearchSkeletons());
+        return;
+      }
+
+      elements.resultsSummary.textContent = state.resultsMessage;
+
+      if (state.searchResults.length > 0) {
+        const grid = createElement("div", "results-grid");
+        state.searchResults.forEach((result, index) => {
+          grid.appendChild(createResultCard(result, index));
+        });
+        elements.resultsContainer.appendChild(grid);
+        return;
+      }
+
+      if (!state.searchQuery.trim()) {
+        elements.resultsContainer.appendChild(
+          createEmptyState(
+            "Cue The Projector",
+            "Start with a movie or series title and CineStream will pull matching IMDB entries for you."
+          )
+        );
+        return;
+      }
+
+      if (state.searchQuery.trim().length < CONFIG.minSearchLength) {
+        elements.resultsContainer.appendChild(
+          createEmptyState(
+            "A Little More Title",
+            "Type at least two characters so the OMDB search can narrow the room."
+          )
+        );
+        return;
+      }
+
+      elements.resultsContainer.appendChild(
+        createEmptyState(
+          "No Reels Found",
+          `Nothing turned up for "${state.searchQuery}". Try another title, year, or alternate spelling.`
+        )
+      );
+    }
+
+    function renderMyList() {
+      clearNode(elements.myListContainer);
+
+      const filteredItems = getFilteredMyList();
+      const hasQuery = Boolean(state.searchQuery.trim());
+
+      elements.myListSummary.textContent = hasQuery
+        ? `${filteredItems.length} of ${state.myList.length} saved titles`
+        : `${state.myList.length} saved title${state.myList.length === 1 ? "" : "s"}`;
+
+      if (!state.myList.length) {
+        elements.myListContainer.appendChild(
+          createEmptyState(
+            "Build Your Watch Shelf",
+            "Save movies and series to My List so your regular picks stay one click away."
+          )
+        );
+        return;
+      }
+
+      if (!filteredItems.length) {
+        elements.myListContainer.appendChild(
+          createEmptyState(
+            "Nothing In Your Shelf Matches",
+            `Your saved titles are intact, but none of them match "${state.searchQuery}".`
+          )
+        );
+        return;
+      }
+
+      const grid = createElement("div", "results-grid");
+      filteredItems.forEach((item, index) => {
+        grid.appendChild(createMyListCard(item, index));
+      });
+      elements.myListContainer.appendChild(grid);
+    }
+
+    function normalizeMeta(meta, fallback) {
+      return {
+        id: meta.id || fallback.imdbId,
+        playerId: fallback.playerId || "",
+        type: meta.type || fallback.type,
+        name: meta.name || fallback.title || "Untitled",
+        poster: meta.poster || fallback.poster || "",
+        description: meta.description || "No synopsis available for this title yet.",
+        year: meta.year || fallback.year || "Unknown",
+        imdbRating: meta.imdbRating || "",
+        videos: Array.isArray(meta.videos)
+          ? meta.videos.map((video) => ({
+              id: video.id || "",
+              title: video.title || `Episode ${video.episode || ""}`.trim(),
+              season: Number(video.season),
+              episode: Number(video.episode),
+              thumbnail: video.thumbnail || "",
+              overview: video.overview || ""
+            })).filter((video) => Number.isFinite(video.season) && Number.isFinite(video.episode))
+          : []
+      };
+    }
+
+    function createDetailView(meta) {
+      const shell = createElement("section", "detail-shell");
+      const primaryPanel = createElement("section", "panel");
+      const layout = createElement("div", "detail-layout");
+      const poster = createMediaFrame({
+        wrapperClass: "detail-poster",
+        imageClass: "media-image",
+        src: meta.poster,
+        alt: `${meta.name} poster`,
+        fallbackText: "No Poster Available"
+      });
+
+      const copy = createElement("div", "detail-copy");
+      const badge = createTypeBadge(meta.type);
+      const title = createElement("h2", "detail-title", meta.name);
+      title.id = "detailHeading";
+
+      const metaLine = createElement("div", "meta-line");
+      const year = createElement("span", "meta-pill", meta.year ? `Year ${meta.year}` : "Year Unknown");
+      const rating = createElement("span", "meta-pill rating-badge", `★ ${formatImdbRating(meta.imdbRating)}`);
+      const imdbId = createElement("span", "meta-pill", `IMDb ${meta.id}`);
+
+      metaLine.append(year, rating, imdbId);
+
+      const description = createElement("p", "detail-description", meta.description);
+      const facts = createElement("div", "facts-grid");
+      facts.append(
+        createInfoFact("Format", meta.type === "series" ? "Series" : "Movie"),
+        createInfoFact("Year", String(meta.year || "Unknown")),
+        createInfoFact("IMDB", formatImdbRating(meta.imdbRating)),
+        createInfoFact("Player ID", meta.playerId || "IMDb fallback")
+      );
+
+      copy.append(badge, title, metaLine, description, facts);
+
+      const detailActions = createElement("div", "detail-actions");
+      const savedItem = buildSavedItemFromMeta(meta);
+
+      if (meta.type === "movie") {
+        const watchButton = createElement("button", "watch-cta", "▶ Watch On Videasy");
+        watchButton.type = "button";
+        watchButton.addEventListener("click", () => {
+          openVideasyUrl(getVideasyMovieUrl(getLaunchId(meta)));
+        });
+        detailActions.appendChild(watchButton);
+      }
+
+      detailActions.appendChild(createMyListToggleButton(savedItem));
+      copy.appendChild(detailActions);
+
+      layout.append(poster, copy);
+      primaryPanel.appendChild(layout);
+      shell.appendChild(primaryPanel);
+
+      if (meta.type === "series") {
+        shell.appendChild(createSeriesPanels(meta));
+      }
+
+      return shell;
+    }
+
+    function createSeriesPanels(meta) {
+      const wrapper = document.createDocumentFragment();
+      const seasons = getAvailableSeasons(meta);
+
+      const seasonPanel = createElement("section", "series-panel");
+      const seasonHead = createElement("div", "section-head");
+      const seasonTitle = createElement("h3", "section-title", "Season Picker");
+      const seasonCopy = createElement("p", "mono-copy", `${seasons.length} season${seasons.length === 1 ? "" : "s"} available`);
+      seasonHead.append(seasonTitle, seasonCopy);
+
+      const tabs = createElement("div", "season-tabs");
+      seasons.forEach((seasonNumber) => {
+        const button = createElement(
+          "button",
+          `season-tab${Number(state.currentSeason) === Number(seasonNumber) ? " is-active" : ""}`,
+          `Season ${seasonNumber}`
+        );
+        button.type = "button";
+        button.addEventListener("click", () => {
+          state.currentSeason = seasonNumber;
+          renderDetail();
+        });
+        tabs.appendChild(button);
+      });
+
+      seasonPanel.append(seasonHead, tabs);
+      wrapper.appendChild(seasonPanel);
+
+      const episodesPanel = createElement("section", "episodes-panel");
+      const episodeHead = createElement("div", "section-head");
+      const episodeTitle = createElement("h3", "section-title", `Season ${state.currentSeason} Episodes`);
+      const episodes = getEpisodesForSeason(meta, state.currentSeason);
+      const episodeCopy = createElement("p", "mono-copy", `${episodes.length} episode${episodes.length === 1 ? "" : "s"} ready`);
+      episodeHead.append(episodeTitle, episodeCopy);
+      episodesPanel.appendChild(episodeHead);
+
+      if (episodes.length === 0) {
+        const message = createElement("div", "message-box", "No episode records are available for this season yet.");
+        episodesPanel.appendChild(message);
+      } else {
+        const grid = createElement("div", "episode-grid");
+        episodes.forEach((episode, index) => {
+          grid.appendChild(createEpisodeCard(getLaunchId(meta), episode, index));
+        });
+        episodesPanel.appendChild(grid);
+      }
+
+      wrapper.appendChild(episodesPanel);
+      return wrapper;
+    }
+
+    function renderDetail() {
+      clearNode(elements.detailContainer);
+
+      if (state.isLoadingMeta) {
+        elements.detailContainer.appendChild(renderDetailSkeleton());
+        return;
+      }
+
+      if (!state.currentMeta) {
+        const panel = createElement("section", "panel");
+        panel.appendChild(
+          createEmptyState(
+            "Pick A Title",
+            "Choose a result to inspect the Cinemeta record, then launch the exact movie or episode on Videasy."
+          )
+        );
+        elements.detailContainer.appendChild(panel);
+        return;
+      }
+
+      elements.detailContainer.appendChild(createDetailView(state.currentMeta));
+    }
+
+    function renderModal() {
+      const open = state.isSettingsRequired || elements.modalOverlay.classList.contains("is-open");
+      elements.modalOverlay.classList.toggle("is-open", open);
+      elements.modalOverlay.setAttribute("aria-hidden", open ? "false" : "true");
+      elements.cancelModalButton.classList.toggle("hidden", state.isSettingsRequired);
+      elements.closeModalButton.classList.toggle("hidden", state.isSettingsRequired);
+      elements.apiKeyInput.value = state.apiKey;
+      elements.modalStatus.textContent = state.modalMessage;
+    }
+
+    function renderSearchHint() {
+      if (state.isSearching) {
+        elements.searchHint.textContent = "Searching OMDB...";
+        return;
+      }
+
+      if (!state.apiKey) {
+        elements.searchHint.textContent = "Add your OMDB API key to start searching.";
+        return;
+      }
+
+      if (state.view === "detail" && state.currentMeta) {
+        elements.searchHint.textContent = "Search again at any time without losing your last result set.";
+        return;
+      }
+
+      elements.searchHint.textContent = "Enter at least 2 characters to start searching.";
+    }
+
+    function render() {
+      switchView(state.view);
+      renderSearchHint();
+      renderMyList();
+      renderSearchResults();
+      renderDetail();
+      renderModal();
+    }
+
+    // ── EVENTS ─────────────────────────────────────────────
+    function closeSettingsModal() {
+      if (state.isSettingsRequired) {
+        return;
+      }
+
+      state.modalMessage = "";
+      elements.modalOverlay.classList.remove("is-open");
+      renderModal();
+    }
+
+    function openSettingsModal(required = false, message = "") {
+      state.isSettingsRequired = required || !state.apiKey;
+      state.modalMessage = message;
+      elements.modalOverlay.classList.add("is-open");
+      renderModal();
+
+      window.setTimeout(() => {
+        elements.apiKeyInput.focus();
+        elements.apiKeyInput.select();
+      }, 20);
+    }
+
+    function openVideasyUrl(url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    async function executeSearch(query) {
+      const normalizedQuery = query.trim();
+      state.searchQuery = normalizedQuery;
+
+      if (!normalizedQuery) {
+        if (runtime.searchAbortController) {
+          runtime.searchAbortController.abort();
+        }
+
+        state.isSearching = false;
+        state.searchResults = [];
+        state.resultsMessage = "Waiting for a title...";
+        state.view = "search";
+        render();
+        return;
+      }
+
+      if (normalizedQuery.length < CONFIG.minSearchLength) {
+        if (runtime.searchAbortController) {
+          runtime.searchAbortController.abort();
+        }
+
+        state.isSearching = false;
+        state.searchResults = [];
+        state.resultsMessage = "Keep typing to begin the search.";
+        state.view = "search";
+        render();
+        return;
+      }
+
+      state.isSearching = true;
+      state.searchResults = [];
+      state.resultsMessage = "Projecting matches...";
+      state.view = "search";
+      render();
+
+      const searchToken = ++runtime.latestSearchToken;
+
+      try {
+        const results = await searchTitles(normalizedQuery);
+
+        if (searchToken !== runtime.latestSearchToken) {
+          return;
+        }
+
+        state.searchResults = results;
+        state.isSearching = false;
+        state.resultsMessage = results.length
+          ? `${results.length} match${results.length === 1 ? "" : "es"} for "${normalizedQuery}"`
+          : `No matches for "${normalizedQuery}"`;
+        render();
+      } catch (error) {
+        if (searchToken !== runtime.latestSearchToken) {
+          return;
+        }
+
+        state.searchResults = [];
+        state.isSearching = false;
+        state.resultsMessage = "Search unavailable right now.";
+        handleError(error, "OMDB Search");
+      }
+    }
+
+    function scheduleSearch(query) {
+      if (runtime.searchDebounceId) {
+        window.clearTimeout(runtime.searchDebounceId);
+      }
+
+      runtime.searchDebounceId = window.setTimeout(() => {
+        void executeSearch(query);
+      }, CONFIG.searchDebounceMs);
+    }
+
+    async function openTitleDetail(result) {
+      const detailToken = ++runtime.latestDetailToken;
+      state.currentMeta = null;
+      state.isLoadingMeta = true;
+      state.view = "detail";
+      render();
+
+      try {
+        const [metaResult, playerIdResult] = await Promise.allSettled([
+          fetchCinemeta(result.imdbId, result.type),
+          fetchVideasyPlayerId(result.imdbId, result.type)
+        ]);
+
+        if (detailToken !== runtime.latestDetailToken) {
+          return;
+        }
+
+        if (metaResult.status !== "fulfilled") {
+          throw metaResult.reason;
+        }
+
+        const normalizedMeta = normalizeMeta(metaResult.value, {
+          ...result,
+          playerId: playerIdResult.status === "fulfilled" ? playerIdResult.value : ""
+        });
+        const seasons = getAvailableSeasons(normalizedMeta);
+
+        state.currentMeta = normalizedMeta;
+        state.currentSeason = normalizedMeta.type === "series"
+          ? (seasons.includes(1) ? 1 : (seasons[0] || 1))
+          : 1;
+        state.isLoadingMeta = false;
+
+        if (isInMyList(normalizedMeta.id)) {
+          upsertMyListItem(buildSavedItemFromMeta(normalizedMeta), { quiet: true });
+        } else {
+          render();
+        }
+
+        if (playerIdResult.status !== "fulfilled") {
+          showToast("Videasy player ID lookup failed, so launches will fall back to the IMDb-based route.", "danger");
+        }
+      } catch (error) {
+        if (detailToken !== runtime.latestDetailToken) {
+          return;
+        }
+
+        state.isLoadingMeta = false;
+        state.view = "search";
+        handleError(error, "Cinemeta Detail");
+      }
+    }
+
+    function onSearchInput(event) {
+      const query = event.target.value;
+      state.searchQuery = query.trim();
+
+      if (!query.trim()) {
+        if (runtime.searchDebounceId) {
+          window.clearTimeout(runtime.searchDebounceId);
+        }
+        void executeSearch("");
+        return;
+      }
+
+      scheduleSearch(query);
+    }
+
+    function onSearchSubmit(event) {
+      event.preventDefault();
+
+      if (runtime.searchDebounceId) {
+        window.clearTimeout(runtime.searchDebounceId);
+      }
+
+      void executeSearch(elements.searchInput.value);
+    }
+
+    function onSettingsSubmit(event) {
+      event.preventDefault();
+      const newKey = elements.apiKeyInput.value.trim();
+
+      if (!newKey) {
+        state.modalMessage = "Please enter a valid OMDB API key.";
+        renderModal();
+        return;
+      }
+
+      state.apiKey = newKey;
+      state.isSettingsRequired = false;
+      state.modalMessage = "";
+      localStorage.setItem(CONFIG.storageKey, newKey);
+      elements.modalOverlay.classList.remove("is-open");
+      renderModal();
+      showToast("OMDB API key saved locally.", "success");
+      render();
+
+      if (state.searchQuery.trim().length >= CONFIG.minSearchLength) {
+        void executeSearch(state.searchQuery);
+      }
+    }
+
+    function onModalOverlayMouseDown(event) {
+      if (event.target === elements.modalOverlay) {
+        closeSettingsModal();
+      }
+    }
+
+    function onGlobalKeyDown(event) {
+      if (event.key === "Escape") {
+        closeSettingsModal();
+      }
+    }
+
+    // ── INIT ───────────────────────────────────────────────
+    function bindEvents() {
+      elements.searchInput.addEventListener("input", onSearchInput);
+      elements.searchForm.addEventListener("submit", onSearchSubmit);
+      elements.settingsButton.addEventListener("click", () => {
+        openSettingsModal(false, "");
+      });
+      elements.closeModalButton.addEventListener("click", closeSettingsModal);
+      elements.cancelModalButton.addEventListener("click", closeSettingsModal);
+      elements.settingsForm.addEventListener("submit", onSettingsSubmit);
+      elements.backButton.addEventListener("click", () => {
+        state.view = "search";
+        render();
+      });
+      elements.modalOverlay.addEventListener("mousedown", onModalOverlayMouseDown);
+      window.addEventListener("keydown", onGlobalKeyDown);
+    }
+
+    function init() {
+      state.myList = loadMyList();
+      bindEvents();
+      render();
+
+      if (!state.apiKey) {
+        openSettingsModal(true, "You only need to do this once.");
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
